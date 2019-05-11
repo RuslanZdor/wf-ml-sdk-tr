@@ -18,6 +18,7 @@ import com.workfusion.vds.sdk.api.nlp.model.Document;
 import com.workfusion.vds.sdk.api.nlp.model.Element;
 import com.workfusion.vds.sdk.api.nlp.model.Line;
 import com.workfusion.vds.sdk.api.nlp.model.Token;
+import info.debatty.java.stringsimilarity.Cosine;
 
 /**
  * Gets similarity of focus annotation to provided keyword
@@ -58,7 +59,11 @@ public class SimilarityKeysInPrevLineFE<T extends Element> implements FeatureExt
     public Collection<Feature> extract(Document document, T element) {
         List<Feature> result = new ArrayList<>();
 
-        // TODO:  PUT YOU CODE HERE
+        List<Line> lines = document.findPrevious(Line.class, element, 1);
+        Cosine cosine = new Cosine();
+        if (!lines.isEmpty() && cosine.similarity(keyword.toUpperCase(), lines.get(0).getText().toUpperCase()) > 0.7) {
+            result.add(new Feature(FEATURE_NAME, 1));
+        }
 
         return result;
     }

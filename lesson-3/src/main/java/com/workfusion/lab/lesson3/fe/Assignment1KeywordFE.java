@@ -43,7 +43,9 @@ public class Assignment1KeywordFE<T extends Element> implements FeatureExtractor
     @Override
     public Collection<Feature> extract(Document document, T element) {
 
-        //TODO: PUT YOUR CODE HERE
+        if (STATES.contains(element.getText())) {
+            return Collections.singletonList(new Feature(FEATURE_NAME, 1));
+        }
 
         return Collections.emptyList();
     }

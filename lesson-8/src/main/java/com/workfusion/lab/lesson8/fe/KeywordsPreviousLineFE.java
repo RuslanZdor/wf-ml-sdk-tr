@@ -11,6 +11,8 @@ import com.workfusion.vds.sdk.api.nlp.fe.Feature;
 import com.workfusion.vds.sdk.api.nlp.fe.FeatureExtractor;
 import com.workfusion.vds.sdk.api.nlp.model.Document;
 import com.workfusion.vds.sdk.api.nlp.model.Element;
+import com.workfusion.vds.sdk.api.nlp.model.Line;
+import com.workfusion.vds.sdk.api.nlp.model.Token;
 
 /**
  * Gets similarity of focus annotation to provided keyword
@@ -33,7 +35,10 @@ public class KeywordsPreviousLineFE<T extends Element> implements FeatureExtract
     public Collection<Feature> extract(Document document, T element) {
         List<Feature> result = new ArrayList<>();
 
-        // TODO:  PUT YOU CODE HERE
+        List<Line> lines = document.findPrevious(Line.class, element, 1);
+        if (!lines.isEmpty() && keyword.equalsIgnoreCase(lines.get(0).getText())) {
+            result.add(new Feature(FEATURE_NAME, 1));
+        }
 
         return result;
     }

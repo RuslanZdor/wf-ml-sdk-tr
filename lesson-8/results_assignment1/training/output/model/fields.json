@@ -1,0 +1,1 @@
+"[{\"code\":\"INFO_EXTRACTION\",\"type\":\"INFO_EXTRACTION\",\"required\":true,\"multiValue\":false,\"children\":[{\"code\":\"total_amount\",\"type\":\"PRICE\",\"required\":true,\"multiValue\":false,\"children\":[],\"properties\":{}}],\"properties\":{}}]"

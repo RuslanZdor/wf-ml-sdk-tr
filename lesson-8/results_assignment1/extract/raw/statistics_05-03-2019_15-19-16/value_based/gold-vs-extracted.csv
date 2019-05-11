@@ -1,0 +1,15 @@
+FILE_NAME,FIELD_NAME,GOLD,EXTRACTED,RESULT,REASON
+invoice101.html,total_amount,80790.48 USD,"80,790.48","FP,FN",FAIL_MODEL
+invoice125.html,total_amount,56496.55 USD,"56,496.55","FP,FN",FAIL_MODEL
+invoice139.html,total_amount,113052.25 USD,"113,052.25","FP,FN",FAIL_MODEL
+invoice144.html,total_amount,28789.54 USD,"28,789.54","FP,FN",FAIL_MODEL
+invoice147.html,total_amount,20646.54 USD,"20,646.54","FP,FN",FAIL_MODEL
+invoice155.html,total_amount,64790.45 USD,"64,790.45","FP,FN",FAIL_MODEL
+invoice16.html,total_amount,44597.77 USD,"44,597.77","FP,FN",FAIL_MODEL
+invoice163.html,total_amount,35486.26 USD,"35,486.26","FP,FN",FAIL_MODEL
+invoice172.html,total_amount,7786.03 USD,"7,786.03","FP,FN",FAIL_MODEL
+invoice181.html,total_amount,42338.65 USD,"42,338.65","FP,FN",FAIL_MODEL
+invoice185.html,total_amount,26928.19 USD,"26,928.19","FP,FN",FAIL_MODEL
+invoice186.html,total_amount,9163.08 USD,"9,163.08","FP,FN",FAIL_MODEL
+invoice189.html,total_amount,59015.99 USD,"59,015.99","FP,FN",FAIL_MODEL
+invoice201.html,total_amount,21742.62 USD,"21,742.62","FP,FN",FAIL_MODEL

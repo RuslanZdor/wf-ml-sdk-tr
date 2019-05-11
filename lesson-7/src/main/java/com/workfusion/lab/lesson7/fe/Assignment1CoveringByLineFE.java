@@ -12,6 +12,7 @@ import com.workfusion.vds.sdk.api.nlp.fe.FeatureExtractor;
 import com.workfusion.vds.sdk.api.nlp.fe.annotation.FeatureName;
 import com.workfusion.vds.sdk.api.nlp.model.Document;
 import com.workfusion.vds.sdk.api.nlp.model.Element;
+import com.workfusion.vds.sdk.api.nlp.model.Line;
 
 /**
  * Assignment 1
@@ -28,7 +29,9 @@ public class Assignment1CoveringByLineFE<T extends Element> implements FeatureEx
     public Collection<Feature> extract(Document document, T element) {
         List<Feature> result = new ArrayList<>();
 
-        // TODO:  PUT YOU CODE HERE
+        if (!document.findCovering(Line.class, element).isEmpty())  {
+            result.add(new Feature(FEATURE_NAME, 1));
+        }
 
         return result;
     }

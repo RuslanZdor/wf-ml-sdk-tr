@@ -11,6 +11,7 @@ import com.workfusion.vds.sdk.api.nlp.fe.Feature;
 import com.workfusion.vds.sdk.api.nlp.fe.FeatureExtractor;
 import com.workfusion.vds.sdk.api.nlp.model.Document;
 import com.workfusion.vds.sdk.api.nlp.model.Element;
+import com.workfusion.vds.sdk.api.nlp.model.NamedEntity;
 
 /**
  * Assignment 2
@@ -26,7 +27,9 @@ public class Assignment2FE<T extends Element> implements FeatureExtractor<T> {
     public Collection<Feature> extract(Document document, T element) {
         List<Feature> result = new ArrayList<>();
 
-        // TODO:  PUT YOU CODE HERE
+        if (!document.findCovering(NamedEntity.class, element).isEmpty()) {
+            result.add(new Feature(FEATURE_NAME, 1));
+        }
 
         return result;
     }

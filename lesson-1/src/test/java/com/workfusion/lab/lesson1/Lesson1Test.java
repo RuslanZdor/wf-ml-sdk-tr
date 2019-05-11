@@ -6,6 +6,7 @@ package com.workfusion.lab.lesson1;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.workfusion.ml.statistics.domain.Run;
 import org.junit.Test;
 
 import com.workfusion.lab.lesson1.annotator.Assignment1TokenAnnotator;
@@ -74,7 +75,7 @@ public class Lesson1Test extends BaseLessonTest {
         // Gets all Sentence provided by the annotator to check
         List<Sentence> sentences = new ArrayList<>(document.findAll(Sentence.class));
 
-        // Checks the provided token with the assignment 1 pattern
+//         Checks the provided token with the assignment 1 pattern
         checkElements(sentences, "lesson_1_assignment_2_check.json");
     }
 

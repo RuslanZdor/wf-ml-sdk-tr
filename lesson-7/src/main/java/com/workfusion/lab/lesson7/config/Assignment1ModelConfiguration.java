@@ -3,8 +3,17 @@
  */
 package com.workfusion.lab.lesson7.config;
 
+import com.workfusion.lab.lesson7.fe.Assignment1CoveringByLineFE;
 import com.workfusion.vds.sdk.api.hypermodel.annotation.ModelConfiguration;
+import com.workfusion.vds.sdk.api.hypermodel.annotation.Named;
+import com.workfusion.vds.sdk.api.nlp.annotator.Annotator;
+import com.workfusion.vds.sdk.api.nlp.configuration.IeConfigurationContext;
+import com.workfusion.vds.sdk.api.nlp.fe.FeatureExtractor;
 import com.workfusion.vds.sdk.api.nlp.model.Token;
+import com.workfusion.vds.sdk.nlp.component.annotator.tokenizer.MatcherTokenAnnotator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The model configuration class.
@@ -13,11 +22,19 @@ import com.workfusion.vds.sdk.api.nlp.model.Token;
 @ModelConfiguration
 public class Assignment1ModelConfiguration {
 
-    /**
-     * Regex pattern to use for matching {@link Token} elements.
-     */
     private final static String TOKEN_REGEX = "[\\w]+";
 
-    // TODO:  PUT YOU CODE HERE
+    @Named("anntotators")
+    public List<Annotator> annotators(IeConfigurationContext context) {
+        List<Annotator> annotators = new ArrayList<>();
+        annotators.add(new MatcherTokenAnnotator("\\w+"));
+        return annotators;
+    }
 
+    @Named("featureExtractors")
+    public List<FeatureExtractor> featureExtractors(IeConfigurationContext context) {
+        List<FeatureExtractor> annotators = new ArrayList<>();
+        annotators.add(new Assignment1CoveringByLineFE());
+        return annotators;
+    }
 }

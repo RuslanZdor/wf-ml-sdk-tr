@@ -3,13 +3,14 @@
  */
 package com.workfusion.lab.lesson3.fe;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import com.workfusion.vds.sdk.api.nlp.fe.Feature;
 import com.workfusion.vds.sdk.api.nlp.fe.FeatureExtractor;
-import com.workfusion.vds.sdk.api.nlp.model.Document;
-import com.workfusion.vds.sdk.api.nlp.model.Element;
+import com.workfusion.vds.sdk.api.nlp.model.*;
 
 /**
  * Assignment 3
@@ -29,7 +30,13 @@ public class Assignment3TableFE<T extends Element> implements FeatureExtractor<T
     @Override
     public Collection<Feature> extract(Document document, T element) {
 
-        //TODO: PUT YOUR CODE HERE
+        if (!document.findCovering(Cell.class, element).isEmpty()) {
+            Cell findElement = document.findCovering(Cell.class, element).get(0);
+            List<Feature> features = new ArrayList<>();
+            features.add(new Feature(ROW_INDEX_FEATURE_NAME, findElement.getRowIndex()));
+            features.add(new Feature(COLUMN_INDEX_FEATURE_NAME, findElement.getColumnIndex()));
+            return features;
+        }
 
         return Collections.emptyList();
     }

@@ -6,6 +6,8 @@ package com.workfusion.lab.lesson8.config;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.workfusion.lab.lesson8.fe.IsNerPresentFE;
+import com.workfusion.lab.lesson8.fe.SimilarityKeysInPrevLineFE;
 import com.workfusion.vds.sdk.api.hypermodel.annotation.ModelConfiguration;
 import com.workfusion.vds.sdk.api.hypermodel.annotation.Named;
 import com.workfusion.vds.sdk.api.nlp.annotator.Annotator;
@@ -16,6 +18,11 @@ import com.workfusion.vds.sdk.api.nlp.model.Element;
 import com.workfusion.vds.sdk.api.nlp.model.Field;
 import com.workfusion.vds.sdk.api.nlp.model.NamedEntity;
 import com.workfusion.vds.sdk.api.nlp.model.Token;
+import com.workfusion.vds.sdk.nlp.component.annotator.EntityBoundaryAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.ner.BaseRegexNerAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.tokenizer.SplitterTokenAnnotator;
+
+import javax.swing.text.html.parser.Entity;
 
 /**
  * The model configuration class.
@@ -53,7 +60,9 @@ public class Assignment2ModelConfiguration {
     public List<Annotator<Document>> getAnnotators(IeConfigurationContext context) {
         List<Annotator<Document>> annotators = new ArrayList<>();
 
-        // TODO:  PUT YOU CODE HERE
+        annotators.add(new SplitterTokenAnnotator(TOKEN_REGEX));
+        annotators.add(new EntityBoundaryAnnotator());
+        annotators.add(BaseRegexNerAnnotator.getJavaPatternRegexNerAnnotator(NER_TYPE_STATE, STATE_REGEX));
 
         return annotators;
     }
@@ -62,7 +71,11 @@ public class Assignment2ModelConfiguration {
     public List<FeatureExtractor<Element>> getFeatureExtractors(IeConfigurationContext context) {
         List<FeatureExtractor<Element>> featuresExtractors = new ArrayList<>();
 
-        // TODO:  PUT YOU CODE HERE
+        featuresExtractors.add(new SimilarityKeysInPrevLineFE<Element>(KEYWORD_SIMILARITY));
+
+//        if (context.getField().getCode().equals(NER_TYPE_STATE)) {
+            featuresExtractors.add(new IsNerPresentFE<>(NER_TYPE_STATE));
+//        }
 
         return featuresExtractors;
     }

@@ -1,0 +1,7 @@
+C:\ruslan_zdor\git\ml_sdk_lessons\lesson-8\results_assignment2\training\input\training-set\invoice0.html
+C:\ruslan_zdor\git\ml_sdk_lessons\lesson-8\results_assignment2\training\input\training-set\invoice116.html
+C:\ruslan_zdor\git\ml_sdk_lessons\lesson-8\results_assignment2\training\input\training-set\invoice128.html
+C:\ruslan_zdor\git\ml_sdk_lessons\lesson-8\results_assignment2\training\input\training-set\invoice138.html
+C:\ruslan_zdor\git\ml_sdk_lessons\lesson-8\results_assignment2\training\input\training-set\invoice159.html
+C:\ruslan_zdor\git\ml_sdk_lessons\lesson-8\results_assignment2\training\input\training-set\invoice173.html
+C:\ruslan_zdor\git\ml_sdk_lessons\lesson-8\results_assignment2\training\input\training-set\invoice180.html

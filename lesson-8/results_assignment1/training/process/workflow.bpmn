@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <signal id="semaphore_eval_18.SF_1" name="semaphore_eval_18.SF_1"></signal>
+  <message id="subprocessError" name="subprocessError"></message>
+  <process id="eval" name="Assignment1Model" isExecutable="true">
+    <startEvent id="eval_1.start" name="Start">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.workfusion.nlp.uima.workflow.listener.SubProcessStartListener"></activiti:executionListener>
+      </extensionElements>
+    </startEvent>
+    <sequenceFlow id="eval_2.link" sourceRef="eval_1.start" targetRef="eval_2.Pmi"></sequenceFlow>
+    <userTask id="eval_2.Pmi" name="Print model info" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.info.PrintModelInfoTask"></activiti:formProperty>
+        <activiti:formProperty id="outputFolder" expression="${workingFolder}output/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_4.link" sourceRef="eval_2.Pmi" targetRef="eval_4.Red"></sequenceFlow>
+    <userTask id="eval_4.Red" name="Remove empty docs" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.RemoveEmptyDocsTask"></activiti:formProperty>
+        <activiti:formProperty id="documentsDir" expression="${workingFolder}input/training-set/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_6.link" sourceRef="eval_4.Red" targetRef="eval_6.Ctstrd"></sequenceFlow>
+    <userTask id="eval_6.Ctstrd" name="Copy training set to raw dir" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.FileUtilTask"></activiti:formProperty>
+        <activiti:formProperty id="paramCommands" expression="[{&quot;operation&quot;:&quot;COPY&quot;,&quot;parameters&quot;:&quot;${workingFolder}input/training-set/ -\u003e ${workingFolder}input/training-set-raw/&quot;}]"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_8.link" sourceRef="eval_6.Ctstrd" targetRef="eval_8.Pts"></sequenceFlow>
+    <userTask id="eval_8.Pts" name="Preprocess training set" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.DocumentPreProcessingTask"></activiti:formProperty>
+        <activiti:formProperty id="documentsDir" expression="${workingFolder}input/training-set-raw/"></activiti:formProperty>
+        <activiti:formProperty id="preprocessorConfigurations" expression="[{&quot;preProcessorClassName&quot;:&quot;com.workfusion.nlp.uima.preprocessor.SpaceRemovingPreprocessor&quot;,&quot;params&quot;:{},&quot;applicableTypes&quot;:[]},{&quot;preProcessorClassName&quot;:&quot;com.workfusion.nlp.uima.preprocessor.MetaManualTagRemovingPreprocessor&quot;,&quot;params&quot;:{},&quot;applicableTypes&quot;:[]}]"></activiti:formProperty>
+        <activiti:formProperty id="processedDocumentsDir" expression="${workingFolder}input/training-set/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_10.link" sourceRef="eval_8.Pts" targetRef="eval_10.Cpts"></sequenceFlow>
+    <userTask id="eval_10.Cpts" name="Create per-tag training sets" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.tag.CreatePerTagTrainingSetsTask"></activiti:formProperty>
+        <activiti:formProperty id="subModels" expression="[&quot;INFO_EXTRACTION&quot;,&quot;total_amount&quot;]"></activiti:formProperty>
+        <activiti:formProperty id="outputDir" expression="${workingFolder}work/training-set-bytag/"></activiti:formProperty>
+        <activiti:formProperty id="trainingSetDir" expression="${workingFolder}input/training-set/"></activiti:formProperty>
+        <activiti:formProperty id="minDocs" expression="10"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_12.link" sourceRef="eval_10.Cpts" targetRef="eval_12.CRDtO"></sequenceFlow>
+    <userTask id="eval_12.CRDtO" name="Copy Reference Data to Output" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.FileUtilTask"></activiti:formProperty>
+        <activiti:formProperty id="paramCommands" expression="[{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}input/ref-data/ -\u003e ${workingFolder}output/resources/ref-data/&quot;},{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}input/dictionaries/ -\u003e ${workingFolder}output/resources/dictionaries/&quot;},{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}input/corrections/ -\u003e ${workingFolder}output/resources/corrections/&quot;},{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}input/resources/ -\u003e ${workingFolder}output/resources/&quot;}]"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_14.link" sourceRef="eval_12.CRDtO" targetRef="eval_14.Ccf"></sequenceFlow>
+    <userTask id="eval_14.Ccf" name="Copy corrections files" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.extract.CopyCorrectionsTask"></activiti:formProperty>
+        <activiti:formProperty id="inputPath" expression="${workingFolder}input/corrections/"></activiti:formProperty>
+        <activiti:formProperty id="outputPath" expression="${workingFolder}output/model/resources/corrections/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_16.link" sourceRef="eval_14.Ccf" targetRef="eval_16.Gt"></sequenceFlow>
+    <userTask id="eval_16.Gt" name="Generate tokenizers" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.model.ie.tokenizer.GenerateTokenizersTask"></activiti:formProperty>
+        <activiti:formProperty id="tokenizerOutputDir" expression="${workingFolder}work/tokenizers/"></activiti:formProperty>
+        <activiti:formProperty id="trainingSetDir" expression="${workingFolder}input/training-set/"></activiti:formProperty>
+        <activiti:formProperty id="goldLabelsJson" expression="[&quot;INFO_EXTRACTION&quot;,&quot;total_amount&quot;]"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_18.link" sourceRef="eval_16.Gt" targetRef="eval_18.SF_1.split"></sequenceFlow>
+    <parallelGateway id="eval_18.SF_1.split" name="Split">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.workfusion.vds.workflow.semaphore.listener.SemaphoreRegisterListener">
+          <activiti:field name="semaphoreId">
+            <activiti:string><![CDATA[eval_18.SF]]></activiti:string>
+          </activiti:field>
+          <activiti:field name="limit">
+            <activiti:string><![CDATA[2147483647]]></activiti:string>
+          </activiti:field>
+        </activiti:executionListener>
+      </extensionElements>
+    </parallelGateway>
+    <sequenceFlow id="eval_18.SF_2.link" sourceRef="eval_18.SF_1.split" targetRef="start_eval_18.SF.1"></sequenceFlow>
+    <intermediateCatchEvent id="start_eval_18.SF.1" name="Acquire: SubModel Flow">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.workfusion.vds.workflow.semaphore.listener.SemaphoreAcquireListener">
+          <activiti:field name="semaphoreId">
+            <activiti:string><![CDATA[eval_18.SF]]></activiti:string>
+          </activiti:field>
+          <activiti:field name="processId">
+            <activiti:string><![CDATA[semaphore_eval_18.SF_1]]></activiti:string>
+          </activiti:field>
+        </activiti:executionListener>
+      </extensionElements>
+      <signalEventDefinition signalRef="semaphore_eval_18.SF_1"></signalEventDefinition>
+    </intermediateCatchEvent>
+    <sequenceFlow id="eval_18.SF_4.link" sourceRef="start_eval_18.SF.1" targetRef="eval_18.SF_4.St"></sequenceFlow>
+    <subProcess id="eval_18.SF_4.St" name="SubModel: total_amount">
+      <startEvent id="eval_18.SF_4.St_1.start" name="Start">
+        <extensionElements>
+          <activiti:executionListener event="start" class="com.workfusion.nlp.uima.workflow.listener.SubProcessStartListener"></activiti:executionListener>
+        </extensionElements>
+      </startEvent>
+      <sequenceFlow id="eval_18.SF_4.St_2.link" sourceRef="eval_18.SF_4.St_1.start" targetRef="eval_18.SF_4.St_2.StCts"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_2.StCts" name="SubModel: total_amount: Check training set" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.tag.CheckTrainingSetTask"></activiti:formProperty>
+          <activiti:formProperty id="fieldName" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="splitByTagDir" expression="${workingFolder}work/training-set-bytag/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_4.link" sourceRef="eval_18.SF_4.St_2.StCts" targetRef="eval_18.SF_4.St_4.Idfse"></sequenceFlow>
+      <exclusiveGateway id="eval_18.SF_4.St_4.Idfse" name="Is docs for subModel exists"></exclusiveGateway>
+      <sequenceFlow id="eval_18.SF_4.St_6.link" sourceRef="eval_18.SF_4.St_4.Idfse" targetRef="eval_18.SF_4.St_6.Smt">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!fieldTagsExist_total_amount}]]></conditionExpression>
+      </sequenceFlow>
+      <userTask id="eval_18.SF_4.St_6.Smt" name="Skip model total_amount" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.vds.workflow.task.common.EmptyTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <endEvent id="eval_18.SF_4.St_8.end" name="End">
+        <extensionElements>
+          <activiti:executionListener event="end" class="com.workfusion.nlp.uima.workflow.listener.SubProcessEndListener"></activiti:executionListener>
+        </extensionElements>
+      </endEvent>
+      <sequenceFlow id="eval_18.SF_4.St_9.link" sourceRef="eval_18.SF_4.St_6.Smt" targetRef="eval_18.SF_4.St_8.end"></sequenceFlow>
+      <sequenceFlow id="eval_18.SF_4.St_10.link" sourceRef="eval_18.SF_4.St_4.Idfse" targetRef="eval_18.SF_4.St_10.StCS">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${fieldTagsExist_total_amount}]]></conditionExpression>
+      </sequenceFlow>
+      <userTask id="eval_18.SF_4.St_10.StCS" name="SubModel: total_amount: (PE) CV Split" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.cv.CrossValidationSplitTask"></activiti:formProperty>
+          <activiti:formProperty id="inputFolder" expression="${workingFolder}work/training-set-bytag/total_amount"></activiti:formProperty>
+          <activiti:formProperty id="numFolds" expression="5"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="useBootstrap" expression="true"></activiti:formProperty>
+          <activiti:formProperty id="splitOutputFolder" expression="${workingFolder}work/split/per-tag/total_amount/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_12.link" sourceRef="eval_18.SF_4.St_10.StCS" targetRef="eval_18.SF_4.St_12.StCS"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_12.StCS" name="SubModel: total_amount: (FE) CV Split" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.cv.CrossValidationSplitTask"></activiti:formProperty>
+          <activiti:formProperty id="inputFolder" expression="${workingFolder}work/training-set-bytag/total_amount"></activiti:formProperty>
+          <activiti:formProperty id="numFolds" expression="5"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="useBootstrap" expression="false"></activiti:formProperty>
+          <activiti:formProperty id="splitOutputFolder" expression="${workingFolder}work/split/full-eval/total_amount/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_14.link" sourceRef="eval_18.SF_4.St_12.StCS" targetRef="eval_18.SF_4.St_14.StDhv"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_14.StDhv" name="SubModel: total_amount: Define hpoId var" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.DefineLocalVariables"></activiti:formProperty>
+          <activiti:formProperty id="variables" expression="hpoId"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="value" expression="total_amount"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_16.link" sourceRef="eval_18.SF_4.St_14.StDhv" targetRef="eval_18.SF_4.St_16.StDFv"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_16.StDFv" name="SubModel: total_amount: Define FieldInfo var" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.DefineLocalVariables"></activiti:formProperty>
+          <activiti:formProperty id="variables" expression="fieldInfo"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="value" expression="{&quot;code&quot;:&quot;total_amount&quot;,&quot;type&quot;:&quot;PRICE&quot;,&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:[],&quot;properties&quot;:{}}"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_18.link" sourceRef="eval_18.SF_4.St_16.StDFv" targetRef="eval_18.SF_4.St_18.tSHE"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_18.tSHE" name="total_amount: Select HPO Experiments" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.vds.workflow.task.hpo.SelectHpoExperimentsTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="workingDir" expression="${workingFolder}work/pre-eval/total_amount/"></activiti:formProperty>
+          <activiti:formProperty id="hpoId" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="fieldInfo" expression="{&quot;code&quot;:&quot;total_amount&quot;,&quot;type&quot;:&quot;PRICE&quot;,&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:[],&quot;properties&quot;:{}}"></activiti:formProperty>
+          <activiti:formProperty id="hyperModelClass" expression="com.workfusion.lab.lesson8.model.Assignment1Model"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_20.link" sourceRef="eval_18.SF_4.St_18.tSHE" targetRef="eval_18.SF_4.St_20.tSF"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_20.tSF" name="total_amount: (PE) Setup Folds" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.experiment.SetupFoldsTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="foldsVarName" expression="folds"></activiti:formProperty>
+          <activiti:formProperty id="foldsNumber" expression="5"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_22.link" sourceRef="eval_18.SF_4.St_20.tSF" targetRef="eval_18.SF_4.St_22.RE"></sequenceFlow>
+      <subProcess id="eval_18.SF_4.St_22.RE" name="Run Experiments">
+        <multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${total_amount__experimentIds}" activiti:elementVariable="experimentId"></multiInstanceLoopCharacteristics>
+        <startEvent id="eval_18.SF_4.St_22.RE_1.start" name="Start">
+          <extensionElements>
+            <activiti:executionListener event="start" class="com.workfusion.nlp.uima.workflow.listener.SubProcessStartListener"></activiti:executionListener>
+          </extensionElements>
+        </startEvent>
+        <sequenceFlow id="eval_18.SF_4.St_22.RE_2.link" sourceRef="eval_18.SF_4.St_22.RE_1.start" targetRef="eval_18.SF_4.St_22.RE_2.EhfE"></sequenceFlow>
+        <subProcess id="eval_18.SF_4.St_22.RE_2.EhfE" name="Error handler for 'total_amount: (PE) Experiment'">
+          <startEvent id="eval_18.SF_4.St_22.RE_2.EhfE_1.start" name="Start">
+            <extensionElements>
+              <activiti:executionListener event="start" class="com.workfusion.nlp.uima.workflow.listener.SubProcessStartListener"></activiti:executionListener>
+            </extensionElements>
+          </startEvent>
+          <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_1.start" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE"></sequenceFlow>
+          <subProcess id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE" name="total_amount: (PE) Experiment">
+            <startEvent id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_1.start" name="Start">
+              <extensionElements>
+                <activiti:executionListener event="start" class="com.workfusion.nlp.uima.workflow.listener.SubProcessStartListener"></activiti:executionListener>
+              </extensionElements>
+            </startEvent>
+            <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_2.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_1.start" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_2.tFE"></sequenceFlow>
+            <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_2.tFE" name="total_amount: (PE) Feature Extract" activiti:candidateUsers="async-task-service">
+              <extensionElements>
+                <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.pipeline.PipelineWrapperTask"></activiti:formProperty>
+                <activiti:formProperty id="pipelineDescriptor" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.FeatureExtractionBuilder$Descriptor&quot;,&quot;pipelineTask&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.FeatureExtractionBuilder&quot;,&quot;name&quot;:&quot;total_amount: (PE) Feature Extract&quot;,&quot;params&quot;:{&quot;@type&quot;:&quot;java.util.HashMap&quot;,&quot;mode&quot;:&quot;TRAINING&quot;,&quot;feOutputFolder&quot;:&quot;${workingFolder}work/pre-eval/total_amount/${experimentId}/features/&quot;,&quot;languageModelFolder&quot;:&quot;${workingFolder}work/pre-eval/total_amount/languageModel/&quot;,&quot;feConfigFolder&quot;:&quot;${workingFolder}work/pre-eval/total_amount/${experimentId}/config/&quot;,&quot;trainingSetFolder&quot;:&quot;${workingFolder}work/split/per-tag/total_amount/all-files.txt&quot;,&quot;compressFeatures&quot;:&quot;true&quot;,&quot;experimentId&quot;:&quot;${experimentId}&quot;,&quot;multiDicPath&quot;:&quot;${workingFolder}input/dictionaries/&quot;,&quot;experimentConfigurationPath&quot;:&quot;${workingFolder}work/pre-eval/total_amount/${experimentId}/config/parameters.json&quot;,&quot;fields&quot;:&quot;[{\&quot;code\&quot;:\&quot;INFO_EXTRACTION\&quot;,\&quot;type\&quot;:\&quot;INFO_EXTRACTION\&quot;,\&quot;required\&quot;:true,\&quot;multiValue\&quot;:false,\&quot;children\&quot;:[{\&quot;code\&quot;:\&quot;total_amount\&quot;,\&quot;type\&quot;:\&quot;PRICE\&quot;,\&quot;required\&quot;:true,\&quot;multiValue\&quot;:false,\&quot;children\&quot;:[],\&quot;properties\&quot;:{}}],\&quot;properties\&quot;:{}}]&quot;,&quot;resourcesDir&quot;:&quot;${workingFolder}output/resources/&quot;}}"></activiti:formProperty>
+                <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}"></activiti:formProperty>
+                <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:4.0,&quot;memoryMb&quot;:4096,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.pre-eval.extract-fe&quot;}}"></activiti:formProperty>
+              </extensionElements>
+            </userTask>
+            <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_4.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_2.tFE" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_4.tRS"></sequenceFlow>
+            <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_4.tRS" name="total_amount: (PE) Remap Split" activiti:candidateUsers="async-task-service">
+              <extensionElements>
+                <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.cv.CvFileRemapTask"></activiti:formProperty>
+                <activiti:formProperty id="sourceFolder" expression="${workingFolder}work/split/per-tag/total_amount/"></activiti:formProperty>
+                <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}"></activiti:formProperty>
+                <activiti:formProperty id="targetReplacementFolder" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/features/"></activiti:formProperty>
+                <activiti:formProperty id="appendSuffix" expression=".fe"></activiti:formProperty>
+                <activiti:formProperty id="targeFolder" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/split/"></activiti:formProperty>
+              </extensionElements>
+            </userTask>
+            <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_4.tRS" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF"></sequenceFlow>
+            <subProcess id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF" name="total_amount: Per Fold Flow">
+              <multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${folds}" activiti:elementVariable="foldNum"></multiInstanceLoopCharacteristics>
+              <startEvent id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_1.start" name="Start">
+                <extensionElements>
+                  <activiti:executionListener event="start" class="com.workfusion.nlp.uima.workflow.listener.SubProcessStartListener"></activiti:executionListener>
+                </extensionElements>
+              </startEvent>
+              <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_2.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_1.start" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_2.tAFf"></sequenceFlow>
+              <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_2.tAFf" name="total_amount: (PE) Aggregate/Convert Features: fold[${foldNum}]" activiti:candidateUsers="async-task-service">
+                <extensionElements>
+                  <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.builder.common.AggregateAndConvertFeaturesTask"></activiti:formProperty>
+                  <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}/fold-${foldNum}"></activiti:formProperty>
+                  <activiti:formProperty id="compressFeatures" expression="true"></activiti:formProperty>
+                  <activiti:formProperty id="modelFolder" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/folds/fold${foldNum}/model/"></activiti:formProperty>
+                  <activiti:formProperty id="experimentId" expression="${experimentId}"></activiti:formProperty>
+                  <activiti:formProperty id="featuresFolder" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/split/fold${foldNum}/trainSet.txt"></activiti:formProperty>
+                  <activiti:formProperty id="experimentConfigurationPath" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/config/parameters.json"></activiti:formProperty>
+                  <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:4096,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.pre-eval.aggregate-fe&quot;}}"></activiti:formProperty>
+                </extensionElements>
+              </userTask>
+              <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_4.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_2.tAFf" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_4.tTf"></sequenceFlow>
+              <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_4.tTf" name="total_amount: (PE) Train: fold[${foldNum}]" activiti:candidateUsers="async-task-service">
+                <extensionElements>
+                  <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.train.TrainTask"></activiti:formProperty>
+                  <activiti:formProperty id="isEvalMode" expression="{&quot;@type&quot;:&quot;boolean&quot;,&quot;value&quot;:true}"></activiti:formProperty>
+                  <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}/fold-${foldNum}"></activiti:formProperty>
+                  <activiti:formProperty id="experimentId" expression="${experimentId}"></activiti:formProperty>
+                  <activiti:formProperty id="modelFolder" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/folds/fold${foldNum}/model/"></activiti:formProperty>
+                  <activiti:formProperty id="experimentConfigurationPath" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/config/parameters.json"></activiti:formProperty>
+                  <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:8192,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.pre-eval.train&quot;}}"></activiti:formProperty>
+                </extensionElements>
+              </userTask>
+              <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_6.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_4.tTf" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_6.tEf"></sequenceFlow>
+              <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_6.tEf" name="total_amount: (PE) Evaluate: fold[${foldNum}]" activiti:candidateUsers="async-task-service">
+                <extensionElements>
+                  <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.pipeline.PipelineWrapperTask"></activiti:formProperty>
+                  <activiti:formProperty id="pipelineDescriptor" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.ClassifyBuilder$Descriptor&quot;,&quot;pipelineTask&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.ClassifyBuilder&quot;,&quot;name&quot;:&quot;total_amount: (PE) Evaluate: fold[${foldNum}]&quot;,&quot;params&quot;:{&quot;@type&quot;:&quot;java.util.HashMap&quot;,&quot;detailedResults&quot;:&quot;${workingFolder}work/pre-eval/total_amount/${experimentId}/folds/fold${foldNum}/detailed/&quot;,&quot;foldName&quot;:&quot;fold${foldNum}&quot;,&quot;fieldName&quot;:&quot;total_amount&quot;,&quot;classifyDetailedResults&quot;:&quot;${experimentId}&quot;,&quot;modelFolder&quot;:&quot;${workingFolder}work/pre-eval/total_amount/${experimentId}/folds/fold${foldNum}/model/&quot;,&quot;featuresFolder&quot;:&quot;${workingFolder}work/pre-eval/total_amount/${experimentId}/split/fold${foldNum}/testSet.txt&quot;,&quot;experimentConfigurationPath&quot;:&quot;${workingFolder}work/pre-eval/total_amount/${experimentId}/config/parameters.json&quot;}}"></activiti:formProperty>
+                  <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}/fold-${foldNum}"></activiti:formProperty>
+                  <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:4096,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.pre-eval.evaluate&quot;}}"></activiti:formProperty>
+                </extensionElements>
+              </userTask>
+              <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_8.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_6.tEf" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_8.tARf"></sequenceFlow>
+              <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_8.tARf" name="total_amount: (PE) Aggregate Results: fold[${foldNum}]" activiti:candidateUsers="async-task-service">
+                <extensionElements>
+                  <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.model.classify.task.CalculateFieldResultsTask"></activiti:formProperty>
+                  <activiti:formProperty id="inputFolder" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/folds/fold${foldNum}/detailed/"></activiti:formProperty>
+                  <activiti:formProperty id="outputFileName" expression="evaluation-results.txt"></activiti:formProperty>
+                  <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}/fold-${foldNum}"></activiti:formProperty>
+                  <activiti:formProperty id="outputFolder" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/folds/fold${foldNum}/results/statistics/"></activiti:formProperty>
+                </extensionElements>
+              </userTask>
+              <endEvent id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_10.end" name="End">
+                <extensionElements>
+                  <activiti:executionListener event="end" class="com.workfusion.nlp.uima.workflow.listener.SubProcessEndListener"></activiti:executionListener>
+                </extensionElements>
+              </endEvent>
+              <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_11.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_8.tARf" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF_10.end"></sequenceFlow>
+            </subProcess>
+            <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_8.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_6.tPFF" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_8.tCOS"></sequenceFlow>
+            <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_8.tCOS" name="total_amount: (PE) Calc Overall Score" activiti:candidateUsers="async-task-service">
+              <extensionElements>
+                <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.results.CalculateCrossValidationStatisticsTask"></activiti:formProperty>
+                <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}"></activiti:formProperty>
+                <activiti:formProperty id="experimentWorkingDirectory" expression="${workingFolder}work/pre-eval/total_amount/${experimentId}/"></activiti:formProperty>
+              </extensionElements>
+            </userTask>
+            <endEvent id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_10.end" name="End">
+              <extensionElements>
+                <activiti:executionListener event="end" class="com.workfusion.nlp.uima.workflow.listener.SubProcessEndListener"></activiti:executionListener>
+              </extensionElements>
+            </endEvent>
+            <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_11.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_8.tCOS" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE_10.end"></sequenceFlow>
+          </subProcess>
+          <endEvent id="eval_18.SF_4.St_22.RE_2.EhfE_4.end" name="End">
+            <extensionElements>
+              <activiti:executionListener event="end" class="com.workfusion.nlp.uima.workflow.listener.SubProcessEndListener"></activiti:executionListener>
+            </extensionElements>
+          </endEvent>
+          <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_5.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_4.end"></sequenceFlow>
+          <boundaryEvent id="eval_18.SF_4.St_22.RE_2.EhfE_2.tE.error" name="ErrorSignal" attachedToRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE" cancelActivity="true">
+            <messageEventDefinition messageRef="subprocessError"></messageEventDefinition>
+          </boundaryEvent>
+          <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_7.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_2.tE.error" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_7.tFEH"></sequenceFlow>
+          <userTask id="eval_18.SF_4.St_22.RE_2.EhfE_7.tFEH" name="total_amount: (PE) Failed Experiment Handling" activiti:candidateUsers="async-task-service">
+            <extensionElements>
+              <activiti:formProperty id="_taskClass" expression="com.workfusion.vds.workflow.task.hpo.FailedExperimentHandlingTask"></activiti:formProperty>
+              <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}"></activiti:formProperty>
+              <activiti:formProperty id="workingDir" expression="${workingFolder}work/pre-eval/total_amount/"></activiti:formProperty>
+            </extensionElements>
+          </userTask>
+          <sequenceFlow id="eval_18.SF_4.St_22.RE_2.EhfE_9.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE_7.tFEH" targetRef="eval_18.SF_4.St_22.RE_2.EhfE_4.end"></sequenceFlow>
+        </subProcess>
+        <sequenceFlow id="eval_18.SF_4.St_22.RE_4.link" sourceRef="eval_18.SF_4.St_22.RE_2.EhfE" targetRef="eval_18.SF_4.St_22.RE_4.tCER"></sequenceFlow>
+        <userTask id="eval_18.SF_4.St_22.RE_4.tCER" name="total_amount: (PE) Create Experiment Results" activiti:candidateUsers="async-task-service">
+          <extensionElements>
+            <activiti:formProperty id="_taskClass" expression="com.workfusion.vds.workflow.task.hpo.CreateExperimentResultTask"></activiti:formProperty>
+            <activiti:formProperty id="_context" expression="total_amount/experiment-${experimentId}"></activiti:formProperty>
+            <activiti:formProperty id="workingDir" expression="${workingFolder}work/pre-eval/total_amount/"></activiti:formProperty>
+            <activiti:formProperty id="experimentId" expression="${experimentId}"></activiti:formProperty>
+            <activiti:formProperty id="hpoId" expression="total_amount"></activiti:formProperty>
+            <activiti:formProperty id="fieldInfo" expression="{&quot;code&quot;:&quot;total_amount&quot;,&quot;type&quot;:&quot;PRICE&quot;,&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:[],&quot;properties&quot;:{}}"></activiti:formProperty>
+            <activiti:formProperty id="hyperModelClass" expression="com.workfusion.lab.lesson8.model.Assignment1Model"></activiti:formProperty>
+          </extensionElements>
+        </userTask>
+        <endEvent id="eval_18.SF_4.St_22.RE_6.end" name="End">
+          <extensionElements>
+            <activiti:executionListener event="end" class="com.workfusion.nlp.uima.workflow.listener.SubProcessEndListener"></activiti:executionListener>
+          </extensionElements>
+        </endEvent>
+        <sequenceFlow id="eval_18.SF_4.St_22.RE_7.link" sourceRef="eval_18.SF_4.St_22.RE_4.tCER" targetRef="eval_18.SF_4.St_22.RE_6.end"></sequenceFlow>
+      </subProcess>
+      <sequenceFlow id="eval_18.SF_4.St_24.link" sourceRef="eval_18.SF_4.St_22.RE" targetRef="eval_18.SF_4.St_24.tCHr"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_24.tCHr" name="total_amount: (PE) Check HPO results" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.vds.workflow.task.hpo.CheckHpoResultsTask"></activiti:formProperty>
+          <activiti:formProperty id="outputDir" expression="${workingFolder}output/model/total_amount/"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="workingDir" expression="${workingFolder}work/pre-eval/total_amount/"></activiti:formProperty>
+          <activiti:formProperty id="hpoSerializationFolder" expression="${workingFolder}work/.hpo_params/"></activiti:formProperty>
+          <activiti:formProperty id="hpoId" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="fieldInfo" expression="{&quot;code&quot;:&quot;total_amount&quot;,&quot;type&quot;:&quot;PRICE&quot;,&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:[],&quot;properties&quot;:{}}"></activiti:formProperty>
+          <activiti:formProperty id="debugMode" expression="true"></activiti:formProperty>
+          <activiti:formProperty id="hyperModelClass" expression="com.workfusion.lab.lesson8.model.Assignment1Model"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_26.link" sourceRef="eval_18.SF_4.St_24.tCHr" targetRef="eval_18.SF_4.St_26.tIHc"></sequenceFlow>
+      <exclusiveGateway id="eval_18.SF_4.St_26.tIHc" name="total_amount: Is HPO completed"></exclusiveGateway>
+      <sequenceFlow id="eval_18.SF_4.St_28.link" sourceRef="eval_18.SF_4.St_26.tIHc" targetRef="eval_18.SF_4.St_18.tSHE">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isHpoCompleted == 'false'}]]></conditionExpression>
+      </sequenceFlow>
+      <sequenceFlow id="eval_18.SF_4.St_29.link" sourceRef="eval_18.SF_4.St_26.tIHc" targetRef="eval_18.SF_4.St_29.tLbei">
+        <conditionExpression xsi:type="tFormalExpression"><![CDATA[${isHpoCompleted == 'true'}]]></conditionExpression>
+      </sequenceFlow>
+      <userTask id="eval_18.SF_4.St_29.tLbei" name="total_amount: Load best experiment info" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.hpo.LoadHpoResutlsTask"></activiti:formProperty>
+          <activiti:formProperty id="bestExperimentFile" expression="${workingFolder}output/model/total_amount/best-experiment.txt"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="workingDir" expression="${workingFolder}work/pre-eval/total_amount/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_31.link" sourceRef="eval_18.SF_4.St_29.tLbei" targetRef="eval_18.SF_4.St_31.StSbep"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_31.StSbep" name="SubModel: total_amount: Save best experiment params" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.experiment.SaveExperimentParamsTask"></activiti:formProperty>
+          <activiti:formProperty id="outputFile" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/config/parameters.json"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_33.link" sourceRef="eval_18.SF_4.St_31.StSbep" targetRef="eval_18.SF_4.St_33.StCbep"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_33.StCbep" name="SubModel: total_amount: Copy best experiment params" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.FileUtilTask"></activiti:formProperty>
+          <activiti:formProperty id="paramCommands" expression="[{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/pre-eval/total_amount/best-experiment.config -\u003e ${workingFolder}output/hpo-config/${hpoId}/best-experiment.config&quot;}]"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_35.link" sourceRef="eval_18.SF_4.St_33.StCbep" targetRef="eval_18.SF_4.St_35.StCh"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_35.StCh" name="SubModel: total_amount: Copy hpo-results" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.FileUtilTask"></activiti:formProperty>
+          <activiti:formProperty id="paramCommands" expression="[{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/pre-eval/total_amount/scores.csv-\u003e${workingFolder}output/hpo/total_amount/scores.csv&quot;}]"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_37.link" sourceRef="eval_18.SF_4.St_35.StCh" targetRef="eval_18.SF_4.St_37.StCrto"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_37.StCrto" name="SubModel: total_amount: Copy resources to output" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.extract.CopyOutputResourcesTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="outputPath" expression="${workingFolder}output/model/${hpoId}/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_39.link" sourceRef="eval_18.SF_4.St_37.StCrto" targetRef="eval_18.SF_4.St_39.StFE"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_39.StFE" name="SubModel: total_amount: (FE) Feature Extract" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.pipeline.PipelineWrapperTask"></activiti:formProperty>
+          <activiti:formProperty id="pipelineDescriptor" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.FeatureExtractionBuilder$Descriptor&quot;,&quot;pipelineTask&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.FeatureExtractionBuilder&quot;,&quot;name&quot;:&quot;SubModel: total_amount: (FE) Feature Extract&quot;,&quot;params&quot;:{&quot;@type&quot;:&quot;java.util.HashMap&quot;,&quot;metaDataFolder&quot;:&quot;${workingFolder}work/eval/meta-data/${hpoId}/&quot;,&quot;sequenceOfOutcomeProcessorClassName&quot;:&quot;com.workfusion.nlp.uima.annotator.ie.sequence.SequenceOfBIESOTagsProcessor&quot;,&quot;logFePerformanceStatistics&quot;:&quot;true&quot;,&quot;feConfigFolder&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/config/&quot;,&quot;trainingSetFolder&quot;:&quot;${workingFolder}work/split/full-eval/total_amount/all-files.txt&quot;,&quot;resourcesDir&quot;:&quot;${workingFolder}output/resources/&quot;,&quot;mode&quot;:&quot;TRAINING&quot;,&quot;feOutputFolder&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/features/&quot;,&quot;languageModelFolder&quot;:&quot;${workingFolder}output/model/total_amount/languageModel/&quot;,&quot;paramMetaDataHandlers&quot;:null,&quot;compressFeatures&quot;:&quot;true&quot;,&quot;experimentId&quot;:&quot;${bestExperiment}&quot;,&quot;fields&quot;:&quot;[{\&quot;code\&quot;:\&quot;INFO_EXTRACTION\&quot;,\&quot;type\&quot;:\&quot;INFO_EXTRACTION\&quot;,\&quot;required\&quot;:true,\&quot;multiValue\&quot;:false,\&quot;children\&quot;:[{\&quot;code\&quot;:\&quot;total_amount\&quot;,\&quot;type\&quot;:\&quot;PRICE\&quot;,\&quot;required\&quot;:true,\&quot;multiValue\&quot;:false,\&quot;children\&quot;:[],\&quot;properties\&quot;:{}}],\&quot;properties\&quot;:{}}]&quot;}}"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:4.0,&quot;memoryMb&quot;:4096,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.full-eval.extract-fe&quot;}}"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_41.link" sourceRef="eval_18.SF_4.St_39.StFE" targetRef="eval_18.SF_4.St_41.StRS"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_41.StRS" name="SubModel: total_amount: (FE) Remap Split" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.cv.CvFileRemapTask"></activiti:formProperty>
+          <activiti:formProperty id="sourceFolder" expression="${workingFolder}work/split/full-eval/total_amount/"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="targetReplacementFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/features/"></activiti:formProperty>
+          <activiti:formProperty id="appendSuffix" expression=".fe"></activiti:formProperty>
+          <activiti:formProperty id="targeFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/split-fe/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_43.link" sourceRef="eval_18.SF_4.St_41.StRS" targetRef="eval_18.SF_4.St_43.StSF"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_43.StSF" name="SubModel: total_amount: (FE) Setup Folds" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.experiment.SetupFoldsTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="foldsVarName" expression="folds"></activiti:formProperty>
+          <activiti:formProperty id="foldsNumber" expression="5"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_45.link" sourceRef="eval_18.SF_4.St_43.StSF" targetRef="eval_18.SF_4.St_45.tFTE_1.split"></sequenceFlow>
+      <parallelGateway id="eval_18.SF_4.St_45.tFTE_1.split" name="Split"></parallelGateway>
+      <sequenceFlow id="eval_18.SF_4.St_45.tFTE_2.link" sourceRef="eval_18.SF_4.St_45.tFTE_1.split" targetRef="eval_18.SF_4.St_45.tFTE_2.FEPF"></sequenceFlow>
+      <subProcess id="eval_18.SF_4.St_45.tFTE_2.FEPF" name="Full Eval Per Fold">
+        <multiInstanceLoopCharacteristics isSequential="false" activiti:collection="${folds}" activiti:elementVariable="foldNum"></multiInstanceLoopCharacteristics>
+        <startEvent id="eval_18.SF_4.St_45.tFTE_2.FEPF_1.start" name="Start">
+          <extensionElements>
+            <activiti:executionListener event="start" class="com.workfusion.nlp.uima.workflow.listener.SubProcessStartListener"></activiti:executionListener>
+          </extensionElements>
+        </startEvent>
+        <sequenceFlow id="eval_18.SF_4.St_45.tFTE_2.FEPF_2.link" sourceRef="eval_18.SF_4.St_45.tFTE_2.FEPF_1.start" targetRef="eval_18.SF_4.St_45.tFTE_2.FEPF_2.tAF"></sequenceFlow>
+        <userTask id="eval_18.SF_4.St_45.tFTE_2.FEPF_2.tAF" name="total_amount: (FE) Aggregate/Convert Features" activiti:candidateUsers="async-task-service">
+          <extensionElements>
+            <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.builder.common.AggregateAndConvertFeaturesTask"></activiti:formProperty>
+            <activiti:formProperty id="_context" expression="total_amount/fold-${foldNum}"></activiti:formProperty>
+            <activiti:formProperty id="compressFeatures" expression="true"></activiti:formProperty>
+            <activiti:formProperty id="modelFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/folds/fold${foldNum}/model/"></activiti:formProperty>
+            <activiti:formProperty id="experimentId" expression="${bestExperiment}"></activiti:formProperty>
+            <activiti:formProperty id="featuresFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/split-fe/fold${foldNum}/trainSet.txt"></activiti:formProperty>
+            <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:4096,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.full-eval.aggregate-fe&quot;}}"></activiti:formProperty>
+          </extensionElements>
+        </userTask>
+        <sequenceFlow id="eval_18.SF_4.St_45.tFTE_2.FEPF_4.link" sourceRef="eval_18.SF_4.St_45.tFTE_2.FEPF_2.tAF" targetRef="eval_18.SF_4.St_45.tFTE_2.FEPF_4.tT"></sequenceFlow>
+        <userTask id="eval_18.SF_4.St_45.tFTE_2.FEPF_4.tT" name="total_amount: (FE) Train" activiti:candidateUsers="async-task-service">
+          <extensionElements>
+            <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.train.TrainTask"></activiti:formProperty>
+            <activiti:formProperty id="isEvalMode" expression="false"></activiti:formProperty>
+            <activiti:formProperty id="_context" expression="total_amount/fold-${foldNum}"></activiti:formProperty>
+            <activiti:formProperty id="experimentId" expression="${bestExperiment}"></activiti:formProperty>
+            <activiti:formProperty id="modelFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/folds/fold${foldNum}/model/"></activiti:formProperty>
+            <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:16384,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.full-eval.train&quot;}}"></activiti:formProperty>
+          </extensionElements>
+        </userTask>
+        <sequenceFlow id="eval_18.SF_4.St_45.tFTE_2.FEPF_6.link" sourceRef="eval_18.SF_4.St_45.tFTE_2.FEPF_4.tT" targetRef="eval_18.SF_4.St_45.tFTE_2.FEPF_6.tE"></sequenceFlow>
+        <userTask id="eval_18.SF_4.St_45.tFTE_2.FEPF_6.tE" name="total_amount: (FE) Evaluate" activiti:candidateUsers="async-task-service">
+          <extensionElements>
+            <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.pipeline.PipelineWrapperTask"></activiti:formProperty>
+            <activiti:formProperty id="pipelineDescriptor" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.ClassifyBuilder$Descriptor&quot;,&quot;pipelineTask&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.ClassifyBuilder&quot;,&quot;name&quot;:&quot;total_amount: (FE) Evaluate&quot;,&quot;params&quot;:{&quot;@type&quot;:&quot;java.util.HashMap&quot;,&quot;detailedResults&quot;:&quot;${workingFolder}work/eval/evaluation-results/total_amount/fold${foldNum}/&quot;,&quot;foldName&quot;:&quot;fold${foldNum}&quot;,&quot;outcomesFolder&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/outcomes/&quot;,&quot;metaDataFolder&quot;:&quot;${workingFolder}work/eval/meta-data/${hpoId}/&quot;,&quot;fieldName&quot;:&quot;total_amount&quot;,&quot;classifyDetailedResults&quot;:&quot;${bestExperiment}&quot;,&quot;modelFolder&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/folds/fold${foldNum}/model/&quot;,&quot;featuresFolder&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/split-fe/fold${foldNum}/testSet.txt&quot;}}"></activiti:formProperty>
+            <activiti:formProperty id="_context" expression="total_amount/fold-${foldNum}"></activiti:formProperty>
+            <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:4096,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.full-eval.evaluate&quot;}}"></activiti:formProperty>
+          </extensionElements>
+        </userTask>
+        <sequenceFlow id="eval_18.SF_4.St_45.tFTE_2.FEPF_8.link" sourceRef="eval_18.SF_4.St_45.tFTE_2.FEPF_6.tE" targetRef="eval_18.SF_4.St_45.tFTE_2.FEPF_8.tAR"></sequenceFlow>
+        <userTask id="eval_18.SF_4.St_45.tFTE_2.FEPF_8.tAR" name="total_amount: Aggregate Results" activiti:candidateUsers="async-task-service">
+          <extensionElements>
+            <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.model.classify.task.CalculateFieldResultsTask"></activiti:formProperty>
+            <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/evaluation-results/total_amount/fold${foldNum}/"></activiti:formProperty>
+            <activiti:formProperty id="outputFileName" expression="evaluation-results.txt"></activiti:formProperty>
+            <activiti:formProperty id="_context" expression="total_amount/fold-${foldNum}"></activiti:formProperty>
+            <activiti:formProperty id="outputFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/folds/fold${foldNum}/evaluation-results/"></activiti:formProperty>
+          </extensionElements>
+        </userTask>
+        <endEvent id="eval_18.SF_4.St_45.tFTE_2.FEPF_10.end" name="End">
+          <extensionElements>
+            <activiti:executionListener event="end" class="com.workfusion.nlp.uima.workflow.listener.SubProcessEndListener"></activiti:executionListener>
+          </extensionElements>
+        </endEvent>
+        <sequenceFlow id="eval_18.SF_4.St_45.tFTE_2.FEPF_11.link" sourceRef="eval_18.SF_4.St_45.tFTE_2.FEPF_8.tAR" targetRef="eval_18.SF_4.St_45.tFTE_2.FEPF_10.end"></sequenceFlow>
+      </subProcess>
+      <sequenceFlow id="eval_18.SF_4.St_45.tFTE_4.link" sourceRef="eval_18.SF_4.St_45.tFTE_2.FEPF" targetRef="eval_18.SF_4.St_45.tFTE_4.tCOS"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_45.tFTE_4.tCOS" name="total_amount: (FE) Calc Overall Score" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.results.CalculateCrossValidationStatisticsTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="experimentWorkingDirectory" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_45.tFTE_6.link" sourceRef="eval_18.SF_4.St_45.tFTE_4.tCOS" targetRef="eval_18.SF_4.St_45.tFTE_6.tSSTT"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_45.tFTE_6.tSSTT" name="total_amount: Save Stats To Tableau" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.tableau.SaveStatisticsTask"></activiti:formProperty>
+          <activiti:formProperty id="saveExperimentId" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/evaluation-results/total_amount/"></activiti:formProperty>
+          <activiti:formProperty id="experimentSteps" expression="[{&quot;name&quot;:&quot;wf-lab-ml-sdk-lesson-8-model:1.0&quot;,&quot;fileSuffix&quot;:&quot;.results.json&quot;,&quot;parserType&quot;:&quot;CRF_JSON&quot;}]"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="extractorsFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/config/parameters.json"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_45.tFTE_8.link" sourceRef="eval_18.SF_4.St_45.tFTE_6.tSSTT" targetRef="eval_18.SF_4.St_45.tFTE_8.join"></sequenceFlow>
+      <parallelGateway id="eval_18.SF_4.St_45.tFTE_8.join" name="Join"></parallelGateway>
+      <sequenceFlow id="eval_18.SF_4.St_45.tFTE_10.link" sourceRef="eval_18.SF_4.St_45.tFTE_1.split" targetRef="eval_18.SF_4.St_45.tFTE_10.tAACF"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_45.tFTE_10.tAACF" name="total_amount: (FT) Aggregate And Convert Features" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.builder.common.AggregateAndConvertFeaturesTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="compressFeatures" expression="true"></activiti:formProperty>
+          <activiti:formProperty id="modelFolder" expression="${workingFolder}output/model/${hpoId}/model/"></activiti:formProperty>
+          <activiti:formProperty id="experimentId" expression="${bestExperiment}"></activiti:formProperty>
+          <activiti:formProperty id="featuresFolder" expression="${workingFolder}work/eval/total_amount/${bestExperiment}/features/"></activiti:formProperty>
+          <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:4096,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.full-train.aggregate-fe&quot;}}"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_45.tFTE_12.link" sourceRef="eval_18.SF_4.St_45.tFTE_10.tAACF" targetRef="eval_18.SF_4.St_45.tFTE_12.tT"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_45.tFTE_12.tT" name="total_amount: (FT) Train" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.train.TrainTask"></activiti:formProperty>
+          <activiti:formProperty id="isEvalMode" expression="false"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="experimentId" expression="${bestExperiment}"></activiti:formProperty>
+          <activiti:formProperty id="modelFolder" expression="${workingFolder}output/model/${hpoId}/model/"></activiti:formProperty>
+          <activiti:formProperty id="_clusterJobParams" expression="{&quot;cpu&quot;:1.0,&quot;memoryMb&quot;:16384,&quot;allInOneJob&quot;:false,&quot;labels&quot;:{&quot;resource-type&quot;:&quot;train.full-train.train&quot;}}"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_45.tFTE_14.link" sourceRef="eval_18.SF_4.St_45.tFTE_12.tT" targetRef="eval_18.SF_4.St_45.tFTE_8.join"></sequenceFlow>
+      <sequenceFlow id="eval_18.SF_4.St_47.link" sourceRef="eval_18.SF_4.St_45.tFTE_8.join" targetRef="eval_18.SF_4.St_47.tC"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_47.tC" name="total_amount: CopyDictionary" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.FileUtilTask"></activiti:formProperty>
+          <activiti:formProperty id="paramCommands" expression="[{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}input/dictionaries/ -\u003e ${workingFolder}output/model/${hpoId}/dictionaries/&quot;}]"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_49.link" sourceRef="eval_18.SF_4.St_47.tC" targetRef="eval_18.SF_4.St_49.tEPC"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_49.tEPC" name="total_amount: Extraction Pipeline Creation" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.extract.IeCreateExtractionPipelineTask"></activiti:formProperty>
+          <activiti:formProperty id="egid" expression="training"></activiti:formProperty>
+          <activiti:formProperty id="sequenceOfOutcomeProcessorClassName" expression="com.workfusion.nlp.uima.annotator.ie.sequence.SequenceOfBIESOTagsProcessor"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="checkerModelFolder" expression="${workingFolder}output/model/${hpoId}/checker-model/"></activiti:formProperty>
+          <activiti:formProperty id="outputFolder" expression="${workingFolder}output/model/${hpoId}/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_51.link" sourceRef="eval_18.SF_4.St_49.tEPC" targetRef="eval_18.SF_4.St_51.tPmi"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_51.tPmi" name="total_amount: Print meta information" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.info.PrintMetaInfoTask"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+          <activiti:formProperty id="outputFolder" expression="${workingFolder}output/model/${hpoId}/"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_53.link" sourceRef="eval_18.SF_4.St_51.tPmi" targetRef="eval_18.SF_4.St_53.StCat"></sequenceFlow>
+      <userTask id="eval_18.SF_4.St_53.StCat" name="SubModel: total_amount: CleanUpAndCopy avg-evaluation-results.txt" activiti:candidateUsers="async-task-service">
+        <extensionElements>
+          <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.FileUtilTask"></activiti:formProperty>
+          <activiti:formProperty id="paramCommands" expression="[{&quot;operation&quot;:&quot;COPY&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/config/ -\u003e ${workingFolder}output/model/${hpoId}/config/&quot;},{&quot;operation&quot;:&quot;MOVE&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/avg-evaluation-results.txt -\u003e ${workingFolder}output/model/total_amount/avg-evaluation-results.txt&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/pre-eval/total_amount/&quot;,&quot;executionProfile&quot;:&quot;PRODUCTION&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/eval/total_amount/${bestExperiment}/folds/&quot;,&quot;executionProfile&quot;:&quot;DEBUG&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}output/model/${hpoId}/model/training-data.liblinear&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}output/model/${hpoId}/model/model.liblinear&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}output/model/${hpoId}/model/training-data.vw&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}output/model/${hpoId}/model/model.vw&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/eval/meta-data/${hpoId}/Replacer/&quot;},{&quot;operation&quot;:&quot;DELETE&quot;,&quot;parameters&quot;:&quot;${workingFolder}work/eval/total_amount/&quot;,&quot;executionProfile&quot;:&quot;PRODUCTION&quot;}]"></activiti:formProperty>
+          <activiti:formProperty id="_context" expression="total_amount"></activiti:formProperty>
+        </extensionElements>
+      </userTask>
+      <sequenceFlow id="eval_18.SF_4.St_55.link" sourceRef="eval_18.SF_4.St_53.StCat" targetRef="eval_18.SF_4.St_8.end"></sequenceFlow>
+    </subProcess>
+    <sequenceFlow id="eval_18.SF_6.link" sourceRef="eval_18.SF_4.St" targetRef="finish_eval_18.SF.1"></sequenceFlow>
+    <intermediateThrowEvent id="finish_eval_18.SF.1" name="Release: SubModel Flow">
+      <extensionElements>
+        <activiti:executionListener event="start" class="com.workfusion.vds.workflow.semaphore.listener.SemaphoreReleaseListener">
+          <activiti:field name="semaphoreId">
+            <activiti:string><![CDATA[eval_18.SF]]></activiti:string>
+          </activiti:field>
+          <activiti:field name="processId">
+            <activiti:string><![CDATA[semaphore_eval_18.SF_1]]></activiti:string>
+          </activiti:field>
+        </activiti:executionListener>
+      </extensionElements>
+      <signalEventDefinition signalRef="semaphore_eval_18.SF_1"></signalEventDefinition>
+    </intermediateThrowEvent>
+    <sequenceFlow id="eval_18.SF_8.link" sourceRef="finish_eval_18.SF.1" targetRef="eval_18.SF_8.join"></sequenceFlow>
+    <parallelGateway id="eval_18.SF_8.join" name="Join"></parallelGateway>
+    <sequenceFlow id="eval_20.link" sourceRef="eval_18.SF_8.join" targetRef="eval_20.CE"></sequenceFlow>
+    <userTask id="eval_20.CE" name="Composite Extract" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.extract.IeCompositeExtractionPipelineTask"></activiti:formProperty>
+        <activiti:formProperty id="outputDir" expression="${workingFolder}output/"></activiti:formProperty>
+        <activiti:formProperty id="postProcessors" expression="{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;com.workfusion.lab.lesson8.processing.TotalAmountPostProcessor&quot;}]}"></activiti:formProperty>
+        <activiti:formProperty id="egid'" expression="training"></activiti:formProperty>
+        <activiti:formProperty id="subModelsJson" expression="[&quot;INFO_EXTRACTION&quot;,&quot;total_amount&quot;]"></activiti:formProperty>
+        <activiti:formProperty id="compositeAnnotatorClass" expression="{&quot;@type&quot;:&quot;class&quot;,&quot;value&quot;:&quot;com.workfusion.nlp.uima.workflow.task.extract.IeCompositeAnnotatorDecorator&quot;}"></activiti:formProperty>
+        <activiti:formProperty id="fields" expression="[{&quot;code&quot;:&quot;INFO_EXTRACTION&quot;,&quot;type&quot;:&quot;INFO_EXTRACTION&quot;,&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:[{&quot;code&quot;:&quot;total_amount&quot;,&quot;type&quot;:&quot;PRICE&quot;,&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:[],&quot;properties&quot;:{}}],&quot;properties&quot;:{}}]"></activiti:formProperty>
+        <activiti:formProperty id="outputFolder" expression="${workingFolder}output/model/"></activiti:formProperty>
+        <activiti:formProperty id="modelDir" expression="${workingFolder}output/model/"></activiti:formProperty>
+        <activiti:formProperty id="documentParser" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.DocumentParserImpl&quot;,&quot;preprocessors&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;},&quot;goldAnnotator&quot;:{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.DocumentParserConfiguration$1&quot;,&quot;this$0&quot;:null},&quot;documentReader&quot;:{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.IeDocumentReader&quot;,&quot;sourceView&quot;:null},&quot;tagAnnotationParsing&quot;:true,&quot;filterClasses&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;class&quot;,&quot;value&quot;:&quot;com.workfusion.nlp.uima.annotator.ie.IeWhitespaceFilter&quot;}]},&quot;goldTags&quot;:{&quot;@type&quot;:&quot;java.util.HashSet&quot;}}"></activiti:formProperty>
+        <activiti:formProperty id="preprocessorConfigurations" expression="[{&quot;preProcessorClassName&quot;:&quot;com.workfusion.nlp.uima.preprocessor.SpaceRemovingPreprocessor&quot;,&quot;params&quot;:{},&quot;applicableTypes&quot;:[]},{&quot;preProcessorClassName&quot;:&quot;com.workfusion.nlp.uima.preprocessor.MetaManualTagRemovingPreprocessor&quot;,&quot;params&quot;:{},&quot;applicableTypes&quot;:[]}]"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_22.link" sourceRef="eval_20.CE" targetRef="eval_22.Caf"></sequenceFlow>
+    <userTask id="eval_22.Caf" name="Combine avg-results files" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.CombineAverageResults"></activiti:formProperty>
+        <activiti:formProperty id="modelsMap" expression="[&quot;INFO_EXTRACTION&quot;,&quot;total_amount&quot;]"></activiti:formProperty>
+        <activiti:formProperty id="resultDir" expression="${workingFolder}output/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_24.link" sourceRef="eval_22.Caf" targetRef="eval_24.CcsaP"></sequenceFlow>
+    <userTask id="eval_24.CcsaP" name="Calculate custom statistics and Post-Process" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.vds.nlp.statistics.CalculateIeStatisticsTask"></activiti:formProperty>
+        <activiti:formProperty id="outputDir" expression="${workingFolder}output/"></activiti:formProperty>
+        <activiti:formProperty id="fileds" expression="{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.api.nlp.configuration.FieldInfo&quot;,&quot;code&quot;:&quot;INFO_EXTRACTION&quot;,&quot;type&quot;:{&quot;name&quot;:&quot;INFO_EXTRACTION&quot;},&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.api.nlp.configuration.FieldInfo&quot;,&quot;code&quot;:&quot;total_amount&quot;,&quot;type&quot;:{&quot;name&quot;:&quot;PRICE&quot;},&quot;required&quot;:true,&quot;multiValue&quot;:false,&quot;children&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;},&quot;properties&quot;:{&quot;@type&quot;:&quot;com.google.gson.internal.LinkedTreeMap&quot;}}]},&quot;properties&quot;:{&quot;@type&quot;:&quot;com.google.gson.internal.LinkedTreeMap&quot;}}]}"></activiti:formProperty>
+        <activiti:formProperty id="calculateRawStatistics" expression="{&quot;@type&quot;:&quot;boolean&quot;,&quot;value&quot;:true}"></activiti:formProperty>
+        <activiti:formProperty id="postProcessorsDataConfiguration" expression="{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;com.workfusion.lab.lesson8.processing.TotalAmountPostProcessor&quot;}]}"></activiti:formProperty>
+        <activiti:formProperty id="statisticsCalculators" expression="{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.nlp.component.statistics.IeStatisticsCalculator&quot;,&quot;fieldResultMappers&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;},&quot;groupResultMappers&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;},&quot;evaluationTypes&quot;:{&quot;@type&quot;:&quot;java.util.RegularEnumSet&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.nlp.component.statistics.StatisticsEvaluationType&quot;,&quot;name&quot;:&quot;VALUE_BASED&quot;}]},&quot;fieldNames&quot;:null,&quot;printers&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.nlp.component.statistics.printer.IeGoldVsExtractedCSVPrinter&quot;,&quot;filePerField&quot;:false},{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.nlp.component.statistics.printer.IeGoldVsExtractedPerGroupCSVPrinter&quot;,&quot;filePerField&quot;:false},{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.nlp.component.statistics.printer.IePerFieldCSVPrinter&quot;},{&quot;@type&quot;:&quot;com.workfusion.vds.sdk.nlp.component.statistics.printer.IePerGroupFieldCSVPrinter&quot;}]},&quot;output&quot;:null}]}"></activiti:formProperty>
+        <activiti:formProperty id="evalMetaDataDir" expression="${workingFolder}work/eval/meta-data/"></activiti:formProperty>
+        <activiti:formProperty id="resourcesDir" expression="${workingFolder}output/resources/"></activiti:formProperty>
+        <activiti:formProperty id="inputDir" expression="${workingFolder}input/training-set/"></activiti:formProperty>
+        <activiti:formProperty id="documentParser" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.DocumentParserImpl&quot;,&quot;preprocessors&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;},&quot;goldAnnotator&quot;:{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.DocumentParserConfiguration$1&quot;,&quot;this$0&quot;:null},&quot;documentReader&quot;:{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.IeDocumentReader&quot;,&quot;sourceView&quot;:null},&quot;tagAnnotationParsing&quot;:true,&quot;filterClasses&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;class&quot;,&quot;value&quot;:&quot;com.workfusion.nlp.uima.annotator.ie.IeWhitespaceFilter&quot;}]},&quot;goldTags&quot;:{&quot;@type&quot;:&quot;java.util.HashSet&quot;}}"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_26.link" sourceRef="eval_24.CcsaP" targetRef="eval_26.MDOB"></sequenceFlow>
+    <userTask id="eval_26.MDOB" name="Meta Data Output Builder" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.pipeline.PipelineWrapperTask"></activiti:formProperty>
+        <activiti:formProperty id="pipelineDescriptor" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.MetaDataCompositeBuilder$Descriptor&quot;,&quot;pipelineTask&quot;:&quot;com.workfusion.nlp.uima.workflow.model.ie.pipeline.MetaDataCompositeBuilder&quot;,&quot;name&quot;:&quot;Meta Data Output Builder&quot;,&quot;params&quot;:{&quot;@type&quot;:&quot;java.util.HashMap&quot;,&quot;testFilesDir&quot;:&quot;${workingFolder}input/training-set/&quot;,&quot;paramMetaDataHandlers&quot;:null,&quot;subModelsJson&quot;:&quot;[\&quot;INFO_EXTRACTION\&quot;,\&quot;total_amount\&quot;]&quot;,&quot;compositeResultAnnotators&quot;:null,&quot;evalMetaDataDir&quot;:&quot;${workingFolder}work/eval/meta-data/&quot;,&quot;documentParser&quot;:&quot;{\&quot;@type\&quot;:\&quot;com.workfusion.nlp.uima.docparser.DocumentParserImpl\&quot;,\&quot;preprocessors\&quot;:{\&quot;@type\&quot;:\&quot;java.util.ArrayList\&quot;},\&quot;goldAnnotator\&quot;:{\&quot;@type\&quot;:\&quot;com.workfusion.nlp.uima.docparser.DocumentParserConfiguration$1\&quot;,\&quot;this$0\&quot;:null},\&quot;documentReader\&quot;:{\&quot;@type\&quot;:\&quot;com.workfusion.nlp.uima.docparser.IeDocumentReader\&quot;,\&quot;sourceView\&quot;:null},\&quot;tagAnnotationParsing\&quot;:true,\&quot;filterClasses\&quot;:{\&quot;@type\&quot;:\&quot;java.util.ArrayList\&quot;,\&quot;@items\&quot;:[{\&quot;@type\&quot;:\&quot;class\&quot;,\&quot;value\&quot;:\&quot;com.workfusion.nlp.uima.annotator.ie.IeWhitespaceFilter\&quot;}]},\&quot;goldTags\&quot;:{\&quot;@type\&quot;:\&quot;java.util.HashSet\&quot;}}&quot;}}"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_28.link" sourceRef="eval_26.MDOB" targetRef="eval_28.Pd"></sequenceFlow>
+    <userTask id="eval_28.Pd" name="Post-process documents" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.pipeline.PipelineWrapperTask"></activiti:formProperty>
+        <activiti:formProperty id="pipelineDescriptor" expression="{&quot;@type&quot;:&quot;com.workfusion.vds.nlp.postprocess.task.DocumentPostProcessBuilder$Descriptor&quot;,&quot;pipelineTask&quot;:&quot;com.workfusion.vds.nlp.postprocess.task.DocumentPostProcessBuilder&quot;,&quot;name&quot;:&quot;Post-process documents&quot;,&quot;params&quot;:{&quot;@type&quot;:&quot;java.util.HashMap&quot;,&quot;postProcessors&quot;:&quot;{\&quot;@type\&quot;:\&quot;java.util.ArrayList\&quot;,\&quot;@items\&quot;:[{\&quot;@type\&quot;:\&quot;com.workfusion.lab.lesson8.processing.TotalAmountPostProcessor\&quot;}]}&quot;,&quot;paramTargetDir&quot;:&quot;${workingFolder}work/eval/meta-data/_post-processed-results/&quot;,&quot;paramSourceDir&quot;:&quot;${workingFolder}work/eval/meta-data/_model-results/&quot;,&quot;evalMetaDataDir&quot;:&quot;${workingFolder}work/eval/meta-data/&quot;,&quot;fields&quot;:&quot;[{\&quot;code\&quot;:\&quot;INFO_EXTRACTION\&quot;,\&quot;type\&quot;:\&quot;INFO_EXTRACTION\&quot;,\&quot;required\&quot;:true,\&quot;multiValue\&quot;:false,\&quot;children\&quot;:[{\&quot;code\&quot;:\&quot;total_amount\&quot;,\&quot;type\&quot;:\&quot;PRICE\&quot;,\&quot;required\&quot;:true,\&quot;multiValue\&quot;:false,\&quot;children\&quot;:[],\&quot;properties\&quot;:{}}],\&quot;properties\&quot;:{}}]&quot;,&quot;resourcesDir&quot;:&quot;${workingFolder}output/resources/&quot;}}"></activiti:formProperty>
+        <activiti:formProperty id="documentParser" expression="{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.DocumentParserImpl&quot;,&quot;preprocessors&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;},&quot;goldAnnotator&quot;:{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.DocumentParserConfiguration$1&quot;,&quot;this$0&quot;:null},&quot;documentReader&quot;:{&quot;@type&quot;:&quot;com.workfusion.nlp.uima.docparser.IeDocumentReader&quot;,&quot;sourceView&quot;:null},&quot;tagAnnotationParsing&quot;:true,&quot;filterClasses&quot;:{&quot;@type&quot;:&quot;java.util.ArrayList&quot;,&quot;@items&quot;:[{&quot;@type&quot;:&quot;class&quot;,&quot;value&quot;:&quot;com.workfusion.nlp.uima.annotator.ie.IeWhitespaceFilter&quot;}]},&quot;goldTags&quot;:{&quot;@type&quot;:&quot;java.util.HashSet&quot;}}"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_30.link" sourceRef="eval_28.Pd" targetRef="eval_30.Crdr"></sequenceFlow>
+    <userTask id="eval_30.Crdr" name="Combine raw detailed results" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.model.classify.task.CombineIeDetailedResultsTask"></activiti:formProperty>
+        <activiti:formProperty id="subModels" expression="[&quot;INFO_EXTRACTION&quot;,&quot;total_amount&quot;]"></activiti:formProperty>
+        <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/evaluation-results/"></activiti:formProperty>
+        <activiti:formProperty id="outputFolder" expression="${workingFolder}work/eval/evaluation-results/combined-raw-results/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_32.link" sourceRef="eval_30.Crdr" targetRef="eval_32.SRSTT"></sequenceFlow>
+    <userTask id="eval_32.SRSTT" name="Save Raw Stats To Tableau" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.tableau.SaveStatisticsTask"></activiti:formProperty>
+        <activiti:formProperty id="saveExperimentId" expression="combined-raw-results"></activiti:formProperty>
+        <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/evaluation-results/combined-raw-results/"></activiti:formProperty>
+        <activiti:formProperty id="experimentSteps" expression="[{&quot;name&quot;:&quot;wf-lab-ml-sdk-lesson-8-model:1.0&quot;,&quot;fileSuffix&quot;:&quot;.results.json&quot;,&quot;parserType&quot;:&quot;CRF_JSON&quot;}]"></activiti:formProperty>
+        <activiti:formProperty id="extractorsFolder"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_34.link" sourceRef="eval_32.SRSTT" targetRef="eval_34.BRbTD"></sequenceFlow>
+    <userTask id="eval_34.BRbTD" name="Build Results by Tagged Docs" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.ConvertTaggedDocumentsToDocumentResultsTask"></activiti:formProperty>
+        <activiti:formProperty id="inputOriginalFolder" expression="${workingFolder}input/training-set/"></activiti:formProperty>
+        <activiti:formProperty id="inputProcessedFolder" expression="${workingFolder}work/eval/meta-data/_post-processed-results/"></activiti:formProperty>
+        <activiti:formProperty id="subModelsJson" expression="[&quot;INFO_EXTRACTION&quot;,&quot;total_amount&quot;]"></activiti:formProperty>
+        <activiti:formProperty id="outputFolder" expression="${workingFolder}work/eval/evaluation-results/combined-results/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_36.link" sourceRef="eval_34.BRbTD" targetRef="eval_36.Sbe"></sequenceFlow>
+    <userTask id="eval_36.Sbe" name="Save best experiment" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.experiment.SaveBestExperimentTask"></activiti:formProperty>
+        <activiti:formProperty id="outputDir" expression="${workingFolder}output/"></activiti:formProperty>
+        <activiti:formProperty id="experimentId" expression="combined-results"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_38.link" sourceRef="eval_36.Sbe" targetRef="eval_38.Sfjtf"></sequenceFlow>
+    <userTask id="eval_38.Sfjtf" name="Save fields json to file" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.SaveParameterToFileTask"></activiti:formProperty>
+        <activiti:formProperty id="outputFile" expression="${workingFolder}output/model/fields.json"></activiti:formProperty>
+        <activiti:formProperty id="parameterName" expression="fields"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_40.link" sourceRef="eval_38.Sfjtf" targetRef="eval_40.SSTT"></sequenceFlow>
+    <userTask id="eval_40.SSTT" name="Save Stats To Tableau" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.tableau.SaveStatisticsTask"></activiti:formProperty>
+        <activiti:formProperty id="saveExperimentId" expression="combined-results"></activiti:formProperty>
+        <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/evaluation-results/combined-results/"></activiti:formProperty>
+        <activiti:formProperty id="experimentSteps" expression="[{&quot;name&quot;:&quot;wf-lab-ml-sdk-lesson-8-model:1.0&quot;,&quot;fileSuffix&quot;:&quot;.results.json&quot;,&quot;parserType&quot;:&quot;CRF_JSON&quot;}]"></activiti:formProperty>
+        <activiti:formProperty id="storeScoreAccuracy" expression="true"></activiti:formProperty>
+        <activiti:formProperty id="extractorsFolder"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_42.link" sourceRef="eval_40.SSTT" targetRef="eval_42.TSASF_1.split"></sequenceFlow>
+    <parallelGateway id="eval_42.TSASF_1.split" name="Split"></parallelGateway>
+    <sequenceFlow id="eval_42.TSASF_2.link" sourceRef="eval_42.TSASF_1.split" targetRef="eval_42.TSASF_2.TSAMftS"></sequenceFlow>
+    <userTask id="eval_42.TSASF_2.TSAMftS" name="Train Score Accuracy Model for total_amount SubModel" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.accuracy.TrainScoreAccuracyModelTask"></activiti:formProperty>
+        <activiti:formProperty id="inputFile" expression="${workingFolder}work/eval/evaluation-results/combined-results/total_amount.csv"></activiti:formProperty>
+        <activiti:formProperty id="outputFolder" expression="${workingFolder}output/model/total_amount/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_42.TSASF_4.link" sourceRef="eval_42.TSASF_2.TSAMftS" targetRef="eval_42.TSASF_4.join"></sequenceFlow>
+    <parallelGateway id="eval_42.TSASF_4.join" name="Join"></parallelGateway>
+    <sequenceFlow id="eval_44.link" sourceRef="eval_42.TSASF_4.join" targetRef="eval_44.Zdr"></sequenceFlow>
+    <userTask id="eval_44.Zdr" name="Zip detailed results" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.ArchiveDirectoryTask"></activiti:formProperty>
+        <activiti:formProperty id="outputFile" expression="${workingFolder}output/evaluation-results.zip"></activiti:formProperty>
+        <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/evaluation-results/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_46.link" sourceRef="eval_44.Zdr" targetRef="eval_46.Zmr"></sequenceFlow>
+    <userTask id="eval_46.Zmr" name="Zip model results" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.ArchiveDirectoryTask"></activiti:formProperty>
+        <activiti:formProperty id="outputFile" expression="${workingFolder}output/model-results.zip"></activiti:formProperty>
+        <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/meta-data/_model-results/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_48.link" sourceRef="eval_46.Zmr" targetRef="eval_48.Zmpr"></sequenceFlow>
+    <userTask id="eval_48.Zmpr" name="Zip model post-processed results" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.ArchiveDirectoryTask"></activiti:formProperty>
+        <activiti:formProperty id="outputFile" expression="${workingFolder}output/post-processed-results.zip"></activiti:formProperty>
+        <activiti:formProperty id="inputFolder" expression="${workingFolder}work/eval/meta-data/_post-processed-results/"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="eval_50.link" sourceRef="eval_48.Zmpr" targetRef="eval_50.Crtod"></sequenceFlow>
+    <userTask id="eval_50.Crtod" name="Copy resources to output dir" activiti:candidateUsers="async-task-service">
+      <extensionElements>
+        <activiti:formProperty id="_taskClass" expression="com.workfusion.nlp.uima.workflow.task.util.FileUtilTask"></activiti:formProperty>
+        <activiti:formProperty id="paramCommands" expression="[{&quot;operation&quot;:&quot;COPY_OPTIONAL&quot;,&quot;parameters&quot;:&quot;${workingFolder}input/resources/lookup/ -\u003e ${workingFolder}output/model/resources/lookup/&quot;}]"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_eval">
+    <bpmndi:BPMNPlane bpmnElement="eval" id="BPMNPlane_eval"></bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

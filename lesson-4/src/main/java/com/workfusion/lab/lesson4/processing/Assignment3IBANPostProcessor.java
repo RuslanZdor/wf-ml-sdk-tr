@@ -3,6 +3,7 @@
  */
 package com.workfusion.lab.lesson4.processing;
 
+import com.workfusion.vds.sdk.nlp.component.processing.normalization.OcrAmountNormalizer;
 import org.apache.commons.validator.routines.checkdigit.IBANCheckDigit;
 
 import com.workfusion.vds.sdk.api.nlp.model.Field;
@@ -26,9 +27,11 @@ public class Assignment3IBANPostProcessor implements Processor<IeDocument> {
 
     @Override
     public void process(IeDocument document) {
-
-        //TODO: PUT YOUR CODE HERE
-
+        IBANCheckDigit checkDigit = new IBANCheckDigit();
+        document.findFields(FIELD_NAME).stream().forEach(fieldInfo -> {
+            if (!checkDigit.isValid(fieldInfo.getText())) {
+                document.remove(fieldInfo);
+            }
+        });
     }
-
 }

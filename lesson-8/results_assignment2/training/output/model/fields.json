@@ -1,0 +1,1 @@
+"[{\"code\":\"INFO_EXTRACTION\",\"type\":\"INFO_EXTRACTION\",\"required\":true,\"multiValue\":false,\"children\":[{\"code\":\"client_address_state\",\"type\":\"FREE_TEXT\",\"required\":true,\"multiValue\":false,\"children\":[],\"properties\":{}}],\"properties\":{}}]"

@@ -30,7 +30,11 @@ public class Assignment2NerFE<T extends Element> implements FeatureExtractor<T> 
     @Override
     public Collection<Feature> extract(Document document, T element) {
 
-        //TODO: PUT YOUR CODE HERE
+        if (!document.findCovering(NamedEntity.class, element).isEmpty()) {
+            if (NER_TYPE.equals(((NamedEntity) document.findCovering(NamedEntity.class, element).get(0)).getType())) {
+                return Collections.singletonList(new Feature(FEATURE_NAME, 1));
+            }
+        }
 
         return Collections.emptyList();
     }

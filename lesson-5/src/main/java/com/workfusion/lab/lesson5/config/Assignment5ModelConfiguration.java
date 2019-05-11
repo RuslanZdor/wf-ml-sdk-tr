@@ -5,15 +5,25 @@ package com.workfusion.lab.lesson5.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.workfusion.vds.sdk.api.hypermodel.annotation.ModelConfiguration;
+import com.workfusion.vds.sdk.api.hypermodel.annotation.Named;
+import com.workfusion.vds.sdk.api.nlp.annotator.Annotator;
+import com.workfusion.vds.sdk.api.nlp.configuration.IeConfigurationContext;
 import com.workfusion.vds.sdk.api.nlp.fe.Feature;
 import com.workfusion.vds.sdk.api.nlp.fe.FeatureExtractor;
 import com.workfusion.vds.sdk.api.nlp.model.Document;
 import com.workfusion.vds.sdk.api.nlp.model.Element;
 import com.workfusion.vds.sdk.api.nlp.model.NamedEntity;
 import com.workfusion.vds.sdk.api.nlp.model.Token;
+import com.workfusion.vds.sdk.nlp.component.annotator.EntityBoundaryAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.ner.AhoCorasickDictionaryNerAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.ner.BaseRegexNerAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.tokenizer.MatcherTokenAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.tokenizer.SplitterTokenAnnotator;
+import com.workfusion.vds.sdk.nlp.component.dictionary.CsvDictionaryKeywordProvider;
 
 import static com.workfusion.lab.lesson5.config.Assignment5ModelConfiguration.NER_TYPE;
 
@@ -38,8 +48,19 @@ public class Assignment5ModelConfiguration {
      */
     public final static String NER_TYPE = "email";
 
-    //TODO: PUT YOUR CODE HERE
+    @Named("annotators")
+    public List<Annotator> annotators(IeConfigurationContext context) {
+        List<Annotator> annotators = new ArrayList<>();
+        annotators.add(new MatcherTokenAnnotator(TOKEN_REGEX));
+        annotators.add(new EntityBoundaryAnnotator());
+        annotators.add(BaseRegexNerAnnotator.getJavaPatternRegexNerAnnotator(NER_TYPE, EMAIL_REGEX));
+        return annotators;
+    }
 
+    @Named("featureExtractors")
+    public List<FeatureExtractor<Element>> featureExtractors() {
+        return Collections.singletonList(new IsNerPresentFE());
+    }
 }
 
 /**

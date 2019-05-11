@@ -1,0 +1,15 @@
+FILE_NAME,FIELD_NAME,GOLD,EXTRACTED,RESULT,REASON
+invoice101.html,client_address_state,ND,ND,TP,EXTRACT_MODEL
+invoice125.html,client_address_state,WI,WI,TP,EXTRACT_MODEL
+invoice139.html,client_address_state,TX,TX,TP,EXTRACT_MODEL
+invoice144.html,client_address_state,WV,WV,TP,EXTRACT_MODEL
+invoice147.html,client_address_state,OR,OR,TP,EXTRACT_MODEL
+invoice155.html,client_address_state,IN,IN,TP,EXTRACT_MODEL
+invoice16.html,client_address_state,MN,MN,TP,EXTRACT_MODEL
+invoice163.html,client_address_state,LA,LA,TP,EXTRACT_MODEL
+invoice172.html,client_address_state,WI,WI,TP,EXTRACT_MODEL
+invoice181.html,client_address_state,WI,WI,TP,EXTRACT_MODEL
+invoice185.html,client_address_state,NC,NC,TP,EXTRACT_MODEL
+invoice186.html,client_address_state,NM,NM,TP,EXTRACT_MODEL
+invoice189.html,client_address_state,NV,NV,TP,EXTRACT_MODEL
+invoice201.html,client_address_state,IL,IL,TP,EXTRACT_MODEL

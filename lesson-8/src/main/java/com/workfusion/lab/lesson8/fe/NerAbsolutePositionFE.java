@@ -6,11 +6,12 @@ package com.workfusion.lab.lesson8.fe;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.workfusion.vds.sdk.api.nlp.annotation.OnDocumentStart;
 import com.workfusion.vds.sdk.api.nlp.fe.Feature;
 import com.workfusion.vds.sdk.api.nlp.fe.FeatureExtractor;
-import com.workfusion.vds.sdk.api.nlp.model.Document;
-import com.workfusion.vds.sdk.api.nlp.model.Element;
+import com.workfusion.vds.sdk.api.nlp.model.*;
 
 /**
  * Determines if focus annotation is NER and the last NER in the document
@@ -22,6 +23,15 @@ public class NerAbsolutePositionFE<T extends Element> implements FeatureExtracto
      */
     public static final String FEATURE_NAME = "lastnerFeature";
 
+    private Collection<NamedEntity> lastEntity = new ArrayList<>();
+
+    @OnDocumentStart
+    public void documentStart(Document document, Class<T> focusElement) {
+        Collection<NamedEntity> sentences = document.findAll(NamedEntity.class);
+
+        lastEntity.add((NamedEntity) sentences.toArray()[sentences.size() - 1]);
+    }
+
     /**
      * Determines if focus annotation is NER and the last NER in the document
      * @param document the Document containing the focus
@@ -31,9 +41,10 @@ public class NerAbsolutePositionFE<T extends Element> implements FeatureExtracto
     @Override
     public Collection<Feature> extract(Document document, T element) {
         List<Feature> result = new ArrayList<>();
-
-        // TODO:  PUT YOU CODE HERE
-
+        Collection<NamedEntity> namedEntities = document.findAll(NamedEntity.class);
+        if (lastEntity.stream().filter(namedEntity -> namedEntity.getText().equals(element.getText())).findFirst().isPresent()) {
+            result.add(new Feature(FEATURE_NAME, 1));
+        }
         return result;
     }
 

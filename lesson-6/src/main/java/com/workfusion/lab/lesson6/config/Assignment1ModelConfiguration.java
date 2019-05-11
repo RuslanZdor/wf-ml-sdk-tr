@@ -4,9 +4,20 @@
 package com.workfusion.lab.lesson6.config;
 
 import com.workfusion.vds.sdk.api.hypermodel.annotation.ModelConfiguration;
+import com.workfusion.vds.sdk.api.hypermodel.annotation.Named;
+import com.workfusion.vds.sdk.api.nlp.annotator.Annotator;
+import com.workfusion.vds.sdk.api.nlp.configuration.IeConfigurationContext;
 import com.workfusion.vds.sdk.api.nlp.model.Field;
 import com.workfusion.vds.sdk.api.nlp.model.NamedEntity;
 import com.workfusion.vds.sdk.api.nlp.model.Token;
+import com.workfusion.vds.sdk.nlp.component.annotator.EntityBoundaryAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.ner.AhoCorasickDictionaryNerAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.ner.BaseRegexNerAnnotator;
+import com.workfusion.vds.sdk.nlp.component.annotator.tokenizer.MatcherTokenAnnotator;
+import com.workfusion.vds.sdk.nlp.component.dictionary.CsvDictionaryKeywordProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Assignment 1
@@ -49,6 +60,22 @@ public class Assignment1ModelConfiguration {
      */
     private final static String COUNTRY_DICTIONARY_PATH = "classpath:dictionary/countries.csv";
 
-    // TODO:  PUT YOU CODE HERE
-
+    @Named("annotators")
+    public List<Annotator> annotators(IeConfigurationContext context) {
+        List<Annotator> annotators = new ArrayList<>();
+        annotators.add(new MatcherTokenAnnotator(TOKEN_REGEX));
+        annotators.add(new EntityBoundaryAnnotator());
+        switch (context.getField().getCode()) {
+            case FIELD_INVOICE_NUMBER: {
+                annotators.add(BaseRegexNerAnnotator.getJavaPatternRegexNerAnnotator(NER_TYPE_INVOICE, INVOICE_REGEX));
+                break;
+            }
+            case FIELD_CLIENT_ADDRESS: {
+                annotators.add(new AhoCorasickDictionaryNerAnnotator(NER_TYPE_COUNTRY,
+                        new CsvDictionaryKeywordProvider(context.getResource(COUNTRY_DICTIONARY_PATH))));
+                break;
+            }
+        }
+        return annotators;
+    }
 }

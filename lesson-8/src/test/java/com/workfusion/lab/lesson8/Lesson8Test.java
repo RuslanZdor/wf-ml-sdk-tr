@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import info.debatty.java.stringsimilarity.Cosine;
 import org.junit.Test;
 
 import com.workfusion.lab.lesson8.config.Assignment1ModelConfiguration;
@@ -178,4 +179,11 @@ public class Lesson8Test extends BaseLessonTest {
         checkFieldStatistics(executionStatistics, Assignment2ModelConfiguration.FIELD_STATE, 0.9, 0.6);
     }
 
+
+    @Test
+    public void testS() {
+        Cosine cosine = new Cosine();
+        System.out.println(cosine.similarity("address".toUpperCase(), "ADDRES$"));
+        System.out.println(cosine.similarity("address".toUpperCase(), "ADDRE$S"));
+    }
 }

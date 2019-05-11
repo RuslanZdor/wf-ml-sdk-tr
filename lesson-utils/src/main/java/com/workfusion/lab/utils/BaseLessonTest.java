@@ -390,6 +390,9 @@ public class BaseLessonTest {
             log("\tActual element:");
             logger.info("\t\t"+actualElement.toString());
 
+            if (!expectedElement.equals(actualElement)) {
+                System.out.println("asdasd");
+            }
             assertThat(expectedElement).isEqualTo(actualElement);
 
          }

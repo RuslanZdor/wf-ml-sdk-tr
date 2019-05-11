@@ -6,6 +6,7 @@ package com.workfusion.lab.lesson4.processing;
 import java.util.Arrays;
 import java.util.List;
 
+import com.workfusion.vds.nlp.similarity.StringSimilarityUtils;
 import com.workfusion.vds.sdk.api.nlp.model.Field;
 import com.workfusion.vds.sdk.api.nlp.model.IeDocument;
 import com.workfusion.vds.sdk.api.nlp.processing.Processor;
@@ -53,9 +54,13 @@ public class Assignment6SimilarityPostProcessor implements Processor<IeDocument>
 
     @Override
     public void process(IeDocument document) {
-
-        //TODO: PUT YOUR CODE HERE
-
+        document.findFields(FIELD_NAME).stream().forEach(fieldInfo -> {
+            for (String product : WORDS) {
+                if (StringSimilarityUtils.jaroWinkler(fieldInfo.getValue(), product) > SIMILARITY_THRESHOLD) {
+                    fieldInfo.setValue(product);
+                }
+            }
+        });
     }
 
 }

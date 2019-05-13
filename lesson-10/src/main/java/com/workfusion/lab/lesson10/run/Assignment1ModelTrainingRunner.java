@@ -12,6 +12,7 @@ import java.util.Map;
 
 import com.workfusion.lab.lesson10.model.Assignment1Model;
 import com.workfusion.vds.sdk.api.nlp.configuration.FieldInfo;
+import com.workfusion.vds.sdk.api.nlp.configuration.FieldType;
 import com.workfusion.vds.sdk.run.ModelRunner;
 import com.workfusion.vds.sdk.run.config.LocalTrainingConfiguration;
 
@@ -36,11 +37,14 @@ public class Assignment1ModelTrainingRunner {
         System.setProperty("WORKFLOW_LOG_FOLDER", "./logs/");
 
         //TODO Configure input/output
-        Path inputDirPath = Paths.get("PUT YOUR PATH HERE");
-        Path outputDirPath = Paths.get("PUT YOUR PATH HERE");
+        Path inputDirPath = Paths.get(INPUT_DIR_PATH);
+        Path outputDirPath = Paths.get(OUTPUT_DIR_PATH);
 
         //TODO Configure fields according to your use-case
         List<FieldInfo> fields = new ArrayList<>();
+        fields.add(new FieldInfo.Builder(FIELD_INVOICE_NUMBER)
+                .type(FieldType.INVOICE_TYPE)
+                .build());
 
         //TODO add parameters if needed.
         Map<String, Object> parameters = new HashMap<>();

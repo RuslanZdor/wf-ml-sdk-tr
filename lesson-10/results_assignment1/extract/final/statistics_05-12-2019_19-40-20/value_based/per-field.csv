@@ -1,0 +1,2 @@
+FIELD,TP,TN,FP,FN,P,R,F1,A
+invoice_number,14,0,0,0,1.0,1.0,1.0,1.0

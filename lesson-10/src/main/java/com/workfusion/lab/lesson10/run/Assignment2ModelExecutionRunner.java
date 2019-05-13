@@ -33,9 +33,9 @@ public class Assignment2ModelExecutionRunner {
         System.setProperty("WORKFLOW_LOG_FOLDER", "./logs/");
 
         //TODO Configure input/output
-        Path trainedModelPath = Paths.get("PUT YOUR PATH HERE");
-        Path inputDirPath = Paths.get("PUT YOUR PATH HERE");
-        Path outputDirPath = Paths.get("PUT YOUR PATH HERE");
+        Path trainedModelPath = Paths.get(MODEL_DIR_PATH);
+        Path inputDirPath = Paths.get(INPUT_DIR_PATH);
+        Path outputDirPath = Paths.get(OUTPUT_DIR_PATH);
 
         Map<String, Object> parameters = new HashMap<>();
 

@@ -1,0 +1,1 @@
+"[{\"code\":\"INFO_EXTRACTION\",\"type\":\"INFO_EXTRACTION\",\"required\":true,\"multiValue\":false,\"children\":[{\"code\":\"invoice_number\",\"type\":\"INVOICE_TYPE\",\"required\":true,\"multiValue\":false,\"children\":[],\"properties\":{}}],\"properties\":{}}]"
